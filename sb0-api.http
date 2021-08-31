@@ -1,0 +1,21 @@
+POST http://localhost:18888/rabbit/queues/queue1
+Content-Type: application/json
+
+{"data":"localhost hello akweiwei"}
+
+###
+GET http://localhost:18888/
+accept: application/json
+
+###
+GET http://localhost:18888/redis-set?key=akwei&value=akwei_data
+
+###
+GET http://localhost:18888/redis-get?key=akwei
+
+###
+GET http://localhost:18888/add
+accept: application/json
+
+###
+
