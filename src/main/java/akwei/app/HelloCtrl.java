@@ -18,10 +18,18 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -58,14 +66,17 @@ public class HelloCtrl {
     @Resource
     private MchService mchService;
 
-    @Resource
-    private KafkaTemplate<String, String> kafkaTemplate;
+//    @Resource
+//    private KafkaTemplate<String, String> kafkaTemplate;
 
     @Resource
     private RabbitTemplate rabbitTemplate;
 
     @Resource
     private WebClient webClient;
+
+    @Resource
+    private RestHighLevelClient restHighLevelClient;
 
 //    @Resource
 //    private ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
@@ -79,6 +90,23 @@ public class HelloCtrl {
         return this.appName + " - " + this.appAge;
     }
 
+    @SneakyThrows
+    @RequestMapping("/es-search")
+    public GetResponse esGet() {
+        GetRequest getRequest = new GetRequest("local-data");
+        return this.restHighLevelClient.get(getRequest, RequestOptions.DEFAULT);
+    }
+
+    @SneakyThrows
+    @RequestMapping("/es-index")
+    public String esIndex() {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("name", "akwei");
+        IndexRequest indexRequest = new IndexRequest("local-data").id("1").source(dataMap);
+        this.restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
+        return this.appName + " - " + this.appAge;
+    }
+
     @RequestMapping("/hello")
     public String hello() {
         return this.appName + " - " + this.appAge;
@@ -87,26 +115,37 @@ public class HelloCtrl {
     @RequestMapping("/{userId}/list")
     public List<User> userList(@PathVariable("userId") Integer userId) {
         log.info("userList invoke");
-        String resp = this.restTemplate.getForObject("http://baidu.com", String.class);
+        String resp = this.restTemplate.getForObject("https://httpbin.org/get", String.class);
         return this.userService.getUsers();
     }
 
+    @RequestMapping("/list-rest")
+    public String restGet() {
+        log.info("userList invoke");
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Customer", "rest-" + System.currentTimeMillis());
+        org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange("https://httpbin.org/get", HttpMethod.GET, entity, String.class);
+        return response.getBody();
+//        return this.restTemplate.getForObject("https://httpbin.org/get", String.class, entity);
+    }
+
     @RequestMapping("/{userId}/list-feign")
-    public List<AreaCode> feign0(@PathVariable("userId") Integer userId) {
+    public String feign0(@PathVariable("userId") Integer userId) {
         log.info("feign0 invoke");
-        return mchService.getAllArea(0L);
+        return mchService.getAllArea(0L, System.currentTimeMillis() + "");
     }
 
     @RequestMapping("/{userId}/list-webclient")
     public void list4WebClient(@PathVariable("userId") Integer userId) {
         webClient.get()
                 .uri(uriBuilder -> uriBuilder.scheme("https")
-                        .host("api.merchant.megaease.cn")
-                        .path("/v1/merchant/base/area-codes")
+                        .host("httpbin.org")
+                        .path("/get")
                         .queryParam("parentAreaCodeId", 0)
                         .build())
                 .header("name", "ok-wei")
-                .retrieve().bodyToFlux(AreaCode.class).collectList().block();
+                .retrieve().bodyToMono(String.class).block();
     }
 
     @RequestMapping("/add")
@@ -162,16 +201,16 @@ public class HelloCtrl {
 //    }
 
 
-    @PostMapping("/kafka/topics/{topic}")
-    public void kafkaSend(
-            @PathVariable(value = "topic") String topic,
-            @RequestBody KafkaMsg kafkaMsg
-    ) throws Exception {
-        log.info("kafkaSend invoke");
-        ListenableFuture<SendResult<String, String>> future = this.kafkaTemplate.send(topic, kafkaMsg.getKey(), kafkaMsg.getData());
-        SendResult<String, String> sendResult = future.get();
-        System.out.println(sendResult);
-    }
+//    @PostMapping("/kafka/topics/{topic}")
+//    public void kafkaSend(
+//            @PathVariable(value = "topic") String topic,
+//            @RequestBody KafkaMsg kafkaMsg
+//    ) throws Exception {
+//        log.info("kafkaSend invoke");
+//        ListenableFuture<SendResult<String, String>> future = this.kafkaTemplate.send(topic, kafkaMsg.getKey(), kafkaMsg.getData());
+//        SendResult<String, String> sendResult = future.get();
+//        System.out.println(sendResult);
+//    }
 
     @PostMapping("/rabbit/queues/{queue}")
     public void rabbitSend(

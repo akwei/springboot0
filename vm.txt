@@ -1,8 +1,9 @@
 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5007
 -javaagent:/Users/akwei/idea_pro/easeagent/build/target/easeagent-dep.jar=/Users/akwei/idea_pro/springboot0/agent.properties
+-Deaseagent.server.enabled=false
+
+
 -Deaseagent.log.conf=/Users/akwei/idea_pro/springboot0/logconf/log4j2.xml
--Deaseagent.server.port=9901
--Deaseagent.middleware.update=true
 
 
 -Dnet.bytebuddy.dump=/Users/akwei/idea_pro/springboot0/dumps
@@ -12,10 +13,13 @@
 EASE_RESOURCE_KAFKA=["localhost:9092"]
 EASE_RESOURCE_DATABASE=["localhost:3306"]
 EASE_RESOURCE_RABBITMQ=["localhost:5672"]
-EASE_RESOURCE_REDIS={"urls":["localhost:6379"]}
-EASE_RESOURCE_REDIS={"urls":["localhost:7000","localhost:7001","localhost:7002"]}
+EASE_RESOURCE_REDIS={"uris":["localhost:6379"]}
+EASE_RESOURCE_REDIS={"uris":["localhost:7000","localhost:7001","localhost:7002"]}
+EASE_RESOURCE_ELASTICSEARCH={"uris":["http://localhost:9200"]}
 
 
 
 
-EASE_RESOURCE_KAFKA={"urls":["localhost:9000"]};EASE_RESOURCE_DATABASE={"urls":["jdbc:mysql://localhost:3306/db_demo?useUnicode=true&characterEncoding=utf-8&autoReconnectForPools=true&autoReconnect=true"]};EASE_RESOURCE_RABBITMQ={"urls":["localhost:5672"]};EASE_RESOURCE_REDIS={"urls":["localhost:7000","localhost:7001","localhost:7002"]}
+EASE_RESOURCE_KAFKA={"uris":["localhost:9092"]};EASE_RESOURCE_DATABASE={"uris":["jdbc:mysql://localhost:3306/db_demo?useUnicode=true&characterEncoding=utf-8&autoReconnectForPools=true&autoReconnect=true"]};EASE_RESOURCE_RABBITMQ={"uris":["localhost:5672"]};EASE_RESOURCE_REDIS={"uris":["localhost:6379"]};EASE_RESOURCE_ELASTICSEARCH={"uris":["http://localhost:9200"]}
+
+ZIPKIN_SERVER_URL=http://localhost:9411/api/v2/spans
