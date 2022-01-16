@@ -24,7 +24,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/db_demo?useUnicode=true&characterEncoding=utf-8&autoReconnectForPools=true&autoReconnect=true
-#    url: jdbc:mysql://localhost:330611/db_demo?useUnicode=true&characterEncoding=utf-8&autoReconnectForPools=true&autoReconnect=true
+    #    url: jdbc:mysql://localhost:330611/db_demo?useUnicode=true&characterEncoding=utf-8&autoReconnectForPools=true&autoReconnect=true
     username: akwei
     password: asdasd
     hikari:
@@ -34,30 +34,32 @@ spring:
   redis:
     host: localhost
     port: 6379
-#    port: 637911
-#    cluster:
-#      nodes:
-#        - localhost:70000
-#        - localhost:70010
-#        - localhost:70020
+  #    port: 637911
+  #    cluster:
+  #      nodes:
+  #        - localhost:70000
+  #        - localhost:70010
+  #        - localhost:70020
 
   kafka:
     bootstrap-servers: 127.0.0.1:9092
-#    bootstrap-servers: 127.0.0.1:909211
+  #    bootstrap-servers: 127.0.0.1:909211
 
   rabbitmq:
     port: 5672
-#    port: 567211
+  #    port: 567211
   elasticsearch:
     rest:
       uris: http://localhost:9200
-#      uris: http://localhost:92000
+  #      uris: http://localhost:92000
+  data:
+    mongodb:
+      uri: mongodb://iot_mapping:8a4b041e@localhost:27017/iot_mapping?authSource=admin&authMechanism=SCRAM-SHA-1
 #  data:
 #    elasticsearch:
 #      client:
 #        reactive:
 #          endpoints: localhost:92000
-
 mybatis:
   configuration:
     map-underscore-to-camel-case: true

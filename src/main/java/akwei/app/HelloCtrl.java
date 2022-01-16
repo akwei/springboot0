@@ -26,13 +26,11 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -84,6 +82,9 @@ public class HelloCtrl {
     @Resource
     private RedisTemplate<String, String> redisTemplate;
 
+    @Resource
+    private MongoTemplate mongoTemplate;
+
     @RequestMapping("/")
     public String index() {
         List<User> users = this.userService.getUsers();
@@ -94,6 +95,7 @@ public class HelloCtrl {
     @RequestMapping("/es-search")
     public GetResponse esGet() {
         GetRequest getRequest = new GetRequest("local-data");
+        getRequest.id("1");
         return this.restHighLevelClient.get(getRequest, RequestOptions.DEFAULT);
     }
 
@@ -185,6 +187,15 @@ public class HelloCtrl {
         List<String> keys = new ArrayList<>(Arrays.asList(split));
         this.redisTemplate.delete(keys);
     }
+
+
+    @RequestMapping("/mongo-insert")
+    public void mongoInsert(@RequestParam(value = "userId", defaultValue = "0") Integer userId) {
+        User user = User.builder().userId(userId).name("akweiwei").createTime(new Date()).build();
+        this.mongoTemplate.insert(user, "batch_data");
+        System.out.println("doc:" + user);
+    }
+
 
     //reactive
 //    @RequestMapping("/reactive-redis-get")
