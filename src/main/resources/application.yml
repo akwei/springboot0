@@ -55,6 +55,7 @@ spring:
   data:
     mongodb:
       uri: mongodb://iot_mapping:8a4b041e@localhost:27017/iot_mapping?authSource=admin&authMechanism=SCRAM-SHA-1
+#      uri: mock-mongodb-fail-uri
 #  data:
 #    elasticsearch:
 #      client:

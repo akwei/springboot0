@@ -18,15 +18,20 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.jetbrains.annotations.NotNull;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -43,6 +48,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+import static org.springframework.data.mongodb.core.query.Query.query;
 
 @Slf4j
 @RestController
@@ -85,6 +93,9 @@ public class HelloCtrl {
     @Resource
     private MongoTemplate mongoTemplate;
 
+    @Resource
+    private ReactiveMongoTemplate reactiveMongoTemplate;
+
     @RequestMapping("/")
     public String index() {
         List<User> users = this.userService.getUsers();
@@ -107,6 +118,43 @@ public class HelloCtrl {
         IndexRequest indexRequest = new IndexRequest("local-data").id("1").source(dataMap);
         this.restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
         return this.appName + " - " + this.appAge;
+    }
+
+    @SneakyThrows
+    @RequestMapping("/es-search-async")
+    public void esGetAsync() {
+        GetRequest getRequest = new GetRequest("local-data");
+        getRequest.id("1");
+        this.restHighLevelClient.getAsync(getRequest, RequestOptions.DEFAULT, new ActionListener<GetResponse>() {
+            @Override
+            public void onResponse(GetResponse documentFields) {
+                log.info("onResponse:{}", documentFields.toString());
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                log.info("onFailure:", e);
+            }
+        });
+    }
+
+    @SneakyThrows
+    @RequestMapping("/es-index-async")
+    public void esIndexAsync() {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("name", "akwei");
+        IndexRequest indexRequest = new IndexRequest("local-data").id("1").source(dataMap);
+        this.restHighLevelClient.indexAsync(indexRequest, RequestOptions.DEFAULT, new ActionListener<IndexResponse>() {
+            @Override
+            public void onResponse(IndexResponse indexResponse) {
+                log.info("onResponse:{}", indexResponse.toString());
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                log.info("onFailure:", e);
+            }
+        });
     }
 
     @RequestMapping("/hello")
@@ -194,6 +242,77 @@ public class HelloCtrl {
         User user = User.builder().userId(userId).name("akweiwei").createTime(new Date()).build();
         this.mongoTemplate.insert(user, "batch_data");
         System.out.println("doc:" + user);
+    }
+
+    @RequestMapping("/mongo-query")
+    public void mongoQuery(@RequestParam(value = "userId", defaultValue = "0") Integer userId) {
+        Optional<User> one = this.mongoTemplate.query(User.class)
+                .inCollection("batch_data")
+                .matching(query(where("userId").is(userId))).one();
+        one.ifPresent(user -> {
+            System.out.println("query doc:" + user);
+        });
+    }
+
+    @RequestMapping("/mongo-insert-reactive")
+    public void mongoInsertReactive(@RequestParam(value = "userId", defaultValue = "0") Integer userId) {
+        User user = User.builder().userId(userId).name("akweiwei").createTime(new Date()).build();
+        this.reactiveMongoTemplate.insert(user, "batch_data")
+                .subscribe(new Subscriber<User>() {
+                    @Override
+                    public void onSubscribe(Subscription subscription) {
+                        log.info("onSubscribe: {}", subscription);
+                    }
+
+                    @Override
+                    public void onNext(User user) {
+                        log.info("onNext: {}", user);
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        log.info("onError: ", throwable);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        log.info("onComplete");
+                    }
+                });
+//                .subscribe(new Consumer<User>() {
+//                    @Override
+//                    public void accept(User user) {
+//                        System.out.println("doc:" + user);
+//                    }
+//                });
+    }
+
+    @RequestMapping("/mongo-query-reactive")
+    public void mongoQueryReactive(@RequestParam(value = "userId", defaultValue = "0") Integer userId) {
+        this.reactiveMongoTemplate.query(User.class)
+                .inCollection("batch_data")
+                .matching(query(where("userId").is(userId))).one()
+                .subscribe(new Subscriber<User>() {
+                    @Override
+                    public void onSubscribe(Subscription subscription) {
+                        log.info("onSubscribe: {}", subscription);
+                    }
+
+                    @Override
+                    public void onNext(User user) {
+                        log.info("onNext: {}", user);
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        log.info("onError: ", throwable);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        log.info("onComplete");
+                    }
+                });
     }
 
 

@@ -1,12 +1,12 @@
 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5007
--javaagent:/Users/akwei/idea_pro/easeagent/build/target/easeagent-dep.jar=/Users/akwei/idea_pro/springboot0/agent.properties
+-javaagent:/Users/yuanwei/idea_pro/easeagent/build/target/easeagent-dep.jar=/Users/yuanwei/idea_pro/springboot0/agent.properties
 -Deaseagent.server.enabled=false
 
 
--Deaseagent.log.conf=/Users/akwei/idea_pro/springboot0/logconf/log4j2.xml
+-Deaseagent.log.conf=/Users/yuanwei/idea_pro/springboot0/logconf/log4j2.xml
 
 
--Dnet.bytebuddy.dump=/Users/akwei/idea_pro/springboot0/dumps
+-Dnet.bytebuddy.dump=/Users/yuanwei/idea_pro/springboot0/dumps
 
 
 
@@ -14,6 +14,7 @@ EASE_RESOURCE_KAFKA=["localhost:9092"]
 EASE_RESOURCE_DATABASE=["localhost:3306"]
 EASE_RESOURCE_RABBITMQ=["localhost:5672"]
 EASE_RESOURCE_REDIS={"uris":["localhost:6379"]}
+EASE_RESOURCE_MONGODB={"uris":"mongodb://iot_mapping:8a4b041e@localhost:27017/iot_mapping?authSource=admin&authMechanism=SCRAM-SHA-1"}
 EASE_RESOURCE_REDIS={"uris":["localhost:7000","localhost:7001","localhost:7002"]}
 EASE_RESOURCE_ELASTICSEARCH={"uris":["http://localhost:9200"]}
 
