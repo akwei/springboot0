@@ -121,6 +121,15 @@ public class HelloCtrl {
     }
 
     @SneakyThrows
+    @RequestMapping("/es-index-1")
+    public IndexResponse esIndex1() {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("name", "akwei");
+        IndexRequest indexRequest = new IndexRequest("local-data").source(dataMap);
+        return this.restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
+    }
+
+    @SneakyThrows
     @RequestMapping("/es-search-async")
     public void esGetAsync() {
         GetRequest getRequest = new GetRequest("local-data");
