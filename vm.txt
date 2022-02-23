@@ -1,6 +1,7 @@
 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5007
--javaagent:/Users/yuanwei/idea_pro/easeagent/build/target/easeagent-dep.jar=/Users/yuanwei/idea_pro/springboot0/agent.properties
+-javaagent:/Users/yuanwei/idea_pro/easeagent/build/target/easeagent-dep.jar
 -Deaseagent.server.enabled=false
+-Deaseagent.config.path=/Users/yuanwei/idea_pro/springboot0/agent.properties
 
 
 -Deaseagent.log.conf=/Users/yuanwei/idea_pro/springboot0/logconf/log4j2.xml
